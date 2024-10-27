@@ -1,0 +1,12 @@
+	['neons'] = {
+		label = 'Neons',
+		weight = 1,
+		stack = true,
+		close = true,
+	},
+	['neonKit'] = {
+		label = 'Neon Kit',
+		weight = 1,
+		stack = true,
+		close = true,
+	},

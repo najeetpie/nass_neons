@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Lights Controller</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Vehicle Neon Control</h1>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-target="page1">Underglow</button>
+            <button class="tab-btn" data-target="page2">Headlights</button>
+            <button class="tab-btn" data-target="page3">Saved</button>
+        </div>
+
+
+        <div id="page1" class="tab-content active">
+            <div class="overall-controls">
+                <div class="section">
+                    <h2>Overall Neon Color</h2>
+                    <input type="color" id="overall-color" value="#ffffff">
+                    <button class="preset-btn" data-animation="toggleLight">Toggle</button>
+                    <button class="preset-btn" data-animation="rainbow">Rainbow</button>
+                </div>
+
+                <div class="section">
+                    <h2>Animations</h2>
+                    <button class="preset-btn" data-animation="flashNeon">Flash</button>
+                    <button class="preset-btn" data-animation="breathingNeon">Breathing</button>
+                    <button class="preset-btn" data-animation="raveNeon">Rave</button>
+                    <button class="preset-btn" data-animation="aroundNeon">Around</button>
+                    <button class="preset-btn" data-animation="ftbNeon">Front To Back</button>
+                    <button class="preset-btn" data-animation="reactiveNeon">Reactive</button>
+                </div>
+            </div>
+
+            <div class="vehicle-preview">
+                <img class="overhead-image" src="images/car_overhead.png" alt="Car Overhead View">
+                <div class="neon-bar left" id="left-neon"></div>
+                <div class="neon-bar right" id="right-neon"></div>
+                <div class="neon-bar back" id="back-neon"></div>
+                <div class="neon-bar front" id="front-neon"></div>
+            </div>
+
+            <div class="controls">
+                <div class="control">
+                    <label for="front-color">Front</label>
+                    <input type="checkbox" id="front-enable" checked>
+                </div>
+                <div class="control">
+                    <label for="back-color">Back</label>
+                    <input type="checkbox" id="back-enable" checked>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="control">
+                    <label for="left-color">Left</label>
+                    <input type="checkbox" id="left-enable" checked>
+                </div>
+                <div class="control">
+                    <label for="right-color">Right</label>
+                    <input type="checkbox" id="right-enable" checked>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="page2" class="tab-content">
+            <div class="overall-controls">
+                <div class="section">
+                    <h2>Overall Headlight Color</h2>
+                    <input type="color" id="overall-headlight-color" value="#000000">
+                    <button class="preset-btn" data-animation="clearHeadlights">Clear</button>
+                    <button class="preset-btn" data-animation="rainbowHeadlights">Rainbow</button>
+                </div>
+
+                <div class="section">
+                    <h2>Animations</h2>
+                    <button class="preset-btn" data-animation="flashHeadlights">Flash</button>
+                </div>
+            </div>
+
+            <div class="vehicle-preview">
+                <img class="overhead-image" src="images/car_overhead.png" alt="Car Overhead View">
+                <div class="headlight-bar left-headlight" id="left-headlight"></div>
+                <div class="headlight-bar right-headlight" id="right-headlight"></div>
+            </div>
+        </div>
+
+
+        <div id="page3" class="tab-content">
+            <div class="input-container">
+                <input type="text" id="presetInput" placeholder="Enter configuration name" />
+                <button id="savePresetButton">Save Configuration</button>
+            </div>
+        
+
+            <div id="savedPresets" class="savedPresets"></div>
+        </div>
+        
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
