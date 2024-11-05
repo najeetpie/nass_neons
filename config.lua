@@ -1,27 +1,31 @@
 Config = {}
-Config.allowSavedConfigs = false
+Config.locale = Locales["en"] -- en | es | fr | de | it | pt | ru| zh
+Config.allowSavedConfigs = true
 
 Config.neons = {
-    command = true,
+    command = false,
     commandName = "neons",
-    item = false,
+    item = true,
     itemName = "neons"
 }
 
-Config.needInstall = true -- should neons be installed, if false then all cars can use neons without mechanic installing it
+Config.needInstall = true -- Should neons be installed, if false then all cars can use neons without installing it
 Config.installNeon = {
-    command = true,
+    command = false,
     commandName = "installneons",
-    item = false,
-    itemName = "neonKit"
+    item = true,
+    itemName = "neonkit",
+    installTime = 3000,  -- how long it should take to install per corner
+    drawDistance = 4.0,
+    interactDistance = 1.5,
 }
 
 Config.mechanicOnly = {
-    neonMenu = false,
-    installNeons = false,
+    neonMenu = true, -- Can anyone access the neons menu or only mechanics | true = mechanic only
+    installNeons = true, -- Can anyone install neons or only mechanics | true = mechanic only
     jobs = {-- List of jobs allowed
         "mechanic", 
         "another_job", 
-        "yet_another_job"
+        "yet_another_job",
     }
 }

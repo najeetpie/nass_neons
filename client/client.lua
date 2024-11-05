@@ -88,16 +88,14 @@ function nuiCallback(data)
             savedNeons = {data.color.r, data.color.g, data.color.b}
         end
     elseif data.event == "clearHeadlightColor" then 
-        ClearVehicleXenonLightsCustomColor(vehicle)
+        data.vehEnt = VehToNet(vehicle)
+        TriggerServerEvent("nass_neons:callback", data)
         rainbowEnabledHeadlights = false
         savedHeadlights = nil
         headlightAnimation = nil
-        SetVehicleLights(vehicle, 3)
     elseif data.event == "changeAllHeadlightColor" then
-        if not IsToggleModOn(vehicle, 22) then
-            ToggleVehicleMod(vehicle, 22, true, false)
-        end
-        SetVehicleXenonLightsCustomColor(vehicle, data.color.r, data.color.g, data.color.b)
+        data.vehEnt = VehToNet(vehicle)
+        TriggerServerEvent("nass_neons:callback", data)
     elseif data.event == "toggleRainbowHeadlights" then 
         local retval, lightsOn, highbeamsOn = GetVehicleLightsState(vehicle)
         if not lightsOn and not highbeamsOn then return end
@@ -168,48 +166,29 @@ function nuiCallback(data)
             SetVehicleLights(vehicle, 3)
         end
     elseif data.event == "saveConfigData" then
-        local neonData = {
-            neons = {
-                left = IsVehicleNeonLightEnabled(vehicle, 0),
-                right = IsVehicleNeonLightEnabled(vehicle, 1),
-                front = IsVehicleNeonLightEnabled(vehicle, 2),
-                back = IsVehicleNeonLightEnabled(vehicle, 3),
-            },
-            neonColor = savedNeons ~= nil and savedNeons or {GetVehicleNeonLightsColour(vehicle)},
-            headlightColor = savedHeadlights ~= nil and savedHeadlights or {GetVehicleXenonLightsCustomColor(vehicle)}, 
-            rainbowEnabled = rainbowEnabled,
-            rainbowEnabledHeadlights = rainbowEnabledHeadlights,
-            neonAnimation = neonAnimation,
-            headlightAnimation = headlightAnimation,
-        }
+        local neonData = getNeonData(vehicle)
         TriggerServerEvent("nass_neons:savePlayerConfig", data.name, neonData)
     elseif data.event == "applyPreset" then
-        local cfgData = data.data
-        nuiCallback({event="changeAllNeonColor", color={r=cfgData.neonColor[1], g=cfgData.neonColor[2], b=cfgData.neonColor[3]}})
-        nuiCallback({event="changeAllHeadlightColor", color={r=cfgData.headlightColor[2], g=cfgData.headlightColor[3], b=cfgData.headlightColor[4]}})
-        nuiCallback({event="neonAnimation", type=cfgData.neonAnimation})
-        nuiCallback({event="headlightAnimation", type=cfgData.headlightAnimation})
-        for k,v in pairs(cfgData.neons) do
-            neonData.neons[k] = v
-            SetVehicleNeonLightEnabled(vehicle, indexTable[k], neonData.neons[k])
-        end
-        Citizen.CreateThread(function()
-            if cfgData.rainbowEnabled then
-                rainbowEnabled = not cfgData.rainbowEnabled
-                nuiCallback({event="toggleRainbow"})
-            end
-        end)
-        Citizen.CreateThread(function()
-            if cfgData.rainbowEnabledHeadlights then
-                SetVehicleLights(vehicle, 3)
-                rainbowEnabledHeadlights = not cfgData.rainbowEnabledHeadlights
-                nuiCallback({event="toggleRainbowHeadlights"})
-            end
-        end)
+        setNeonData(vehicle, data.data)
     elseif data.event == "deletePreset" then
         TriggerServerEvent("nass_neons:deleteSavedConfig", data.index)
     end
 end
+
+RegisterNetEvent('nass_neons:serverCallback')
+AddEventHandler('nass_neons:serverCallback', function(data)
+    if data.event == "changeAllHeadlightColor" then
+        local veh = NetToVeh(data.vehEnt)
+        if not IsToggleModOn(veh, 22) then
+            ToggleVehicleMod(veh, 22, true, false)
+        end
+        SetVehicleXenonLightsCustomColor(veh, data.color.r, data.color.g, data.color.b)
+    elseif data.event == "clearHeadlightColor" then
+        local veh = NetToVeh(data.vehEnt)
+        ClearVehicleXenonLightsCustomColor(veh)
+        SetVehicleLights(veh, 3)
+    end
+end)
 
 AddEventHandler('gameEventTriggered', function(event, data)
     if event ~= "CEventNetworkPlayerEnteredVehicle" then return end
@@ -225,7 +204,7 @@ end)
 local loopRunning = false
 function toggleRGB()
     local rainbow = {}
-    if loopRunning then return print("stopeed double") end
+    if loopRunning then return end
     loopRunning = true
     while rainbowEnabled or rainbowEnabledHeadlights do
         Wait(80) -- Faster updates for smooth transitions
@@ -334,14 +313,14 @@ function handleAnimations()
                 SetVehicleNeonLightEnabled(vehicle, 2, frontEnabled) 
                 SetVehicleNeonLightEnabled(vehicle, 3, backEnabled)  
 
-                Citizen.Wait(math.random(50, 200)) 
+                Wait(math.random(50, 200)) 
 
                 SetVehicleNeonLightEnabled(vehicle, 0, false)
                 SetVehicleNeonLightEnabled(vehicle, 1, false)
                 SetVehicleNeonLightEnabled(vehicle, 2, false)
                 SetVehicleNeonLightEnabled(vehicle, 3, false)
 
-                Citizen.Wait(math.random(50, 100))
+                Wait(math.random(50, 100))
             end
         end
 
@@ -354,4 +333,154 @@ function handleAnimations()
             end
         end
     end
+end
+
+RegisterNetEvent('nass_neons:notify')
+AddEventHandler('nass_neons:notify', function(msg) --Had issues when trying to call directly to the notify function. This seems to work much better
+    notify(msg)
+end)
+
+function notify(msg)
+    BeginTextCommandThefeedPost('STRING')
+    AddTextComponentSubstringPlayerName(msg)
+    EndTextCommandThefeedPostTicker(0, 1)
+end
+
+function getNeonData(veh)
+    vehicle = veh
+    local neonData = {
+        neons = {
+            left = IsVehicleNeonLightEnabled(vehicle, 0),
+            right = IsVehicleNeonLightEnabled(vehicle, 1),
+            front = IsVehicleNeonLightEnabled(vehicle, 2),
+            back = IsVehicleNeonLightEnabled(vehicle, 3),
+        },
+        neonColor = savedNeons ~= nil and savedNeons or {GetVehicleNeonLightsColour(vehicle)},
+        headlightColor = savedHeadlights ~= nil and savedHeadlights or {GetVehicleXenonLightsCustomColor(vehicle)}, 
+        rainbowEnabled = rainbowEnabled,
+        rainbowEnabledHeadlights = rainbowEnabledHeadlights,
+        neonAnimation = neonAnimation,
+        headlightAnimation = headlightAnimation,
+    }
+    return neonData
+end
+
+function setNeonData(veh, data)
+    vehicle = veh
+    nuiCallback({event="changeAllNeonColor", color={r=data.neonColor[1], g=data.neonColor[2], b=data.neonColor[3]}})
+    nuiCallback({event="changeAllHeadlightColor", color={r=data.headlightColor[2], g=data.headlightColor[3], b=data.headlightColor[4]}})
+    nuiCallback({event="neonAnimation", type=data.neonAnimation})
+    nuiCallback({event="headlightAnimation", type=data.headlightAnimation})
+    for k,v in pairs(data.neons) do
+        neonData.neons[k] = v
+        SetVehicleNeonLightEnabled(vehicle, indexTable[k], neonData.neons[k])
+    end
+    Citizen.CreateThread(function()
+        if data.rainbowEnabled then
+            rainbowEnabled = not data.rainbowEnabled
+            nuiCallback({event="toggleRainbow"})
+        end
+    end)
+    Citizen.CreateThread(function()
+        if data.rainbowEnabledHeadlights then
+            SetVehicleLights(vehicle, 3)
+            rainbowEnabledHeadlights = not data.rainbowEnabledHeadlights
+            nuiCallback({event="toggleRainbowHeadlights"})
+        end
+    end)
+end
+
+
+local vehicleBones = {
+    { label = "Front", bone = "bonnet" },
+    { label = "Back", bone = "boot" },
+    { label = "Left", bone = "door_dside_f" },
+    { label = "Right", bone = "door_pside_f" }
+}
+
+function playAnimation(animDict, animName, animFlag)
+    RequestAnimDict(animDict)
+    while not HasAnimDictLoaded(animDict) do
+        Wait(10)
+    end
+    TaskPlayAnim(PlayerPedId(), animDict, animName, 8.0, -8.0, -1, animFlag or 1, 0, false, false, false)
+end
+
+function installNeon(vehicle, item)
+    isInstalling = true
+    cornersCompleted = {}
+    currentCornerIndex = 1
+
+    for _, corner in pairs(vehicleBones) do
+        local boneIndex = GetEntityBoneIndexByName(vehicle, corner.bone)
+        if boneIndex ~= -1 then
+            local cornerPos = GetWorldPositionOfEntityBone(vehicle, boneIndex)
+            cornersCompleted[corner.label] = { completed = false, position = cornerPos }
+        else
+            cornersCompleted[corner.label] = { completed = true }
+        end
+    end
+
+    Citizen.CreateThread(function()
+        while isInstalling do
+            Wait(0)
+            local currentCornerLabel = vehicleBones[currentCornerIndex].label
+            local currentCorner = cornersCompleted[currentCornerLabel]
+
+            if currentCorner and not currentCorner.completed then
+                local playerPos = GetEntityCoords(PlayerPedId())
+                local distance = #(playerPos - currentCorner.position)
+
+                if distance < Config.installNeon.drawDistance then
+                    draw3DText(currentCorner.position.x, currentCorner.position.y, currentCorner.position.z + 0.5, string.format(Config.locale["install_neon"], currentCornerLabel))
+                    if IsControlJustPressed(1, 38) and distance < Config.installNeon.interactDistance then
+                        playAnimation("anim@amb@business@weed@weed_inspecting_lo_med_hi@", "weed_crouch_checkingleaves_idle_02_inspector", 1)
+                        Wait(Config.installNeon.installTime)
+                        ClearPedTasks(PlayerPedId())
+                        cornersCompleted[currentCornerLabel].completed = true
+
+                        while cornersCompleted[vehicleBones[currentCornerIndex]?.label]?.completed do
+                            currentCornerIndex = currentCornerIndex + 1
+                            if currentCornerIndex > #vehicleBones then
+                                isInstalling = false
+                                notify(Config.locale["neons_succ_installed"])
+                                TriggerServerEvent("nass_neons:installNeons", GetVehicleNumberPlateText(vehicle), item)
+                                vehicle = 0
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        vehicle = 0
+    end)
+end
+
+RegisterNetEvent('nass_neons:installNeons')
+AddEventHandler('nass_neons:installNeons', function(item)
+    local ped = PlayerPedId()
+    vehicle = GetVehiclePedIsIn(ped, false)
+
+    if vehicle ~= 0 and GetPedInVehicleSeat(vehicle, -1) == ped then
+        if GetEntitySpeed(vehicle) < 1.0 then
+            TaskLeaveVehicle(ped, vehicle, 0)
+            Wait(500)
+            installNeon(vehicle, item)
+        end
+    end
+end)
+
+function draw3DText(x, y, z, text)
+    local onScreen, _x, _y = World3dToScreen2d(x, y, z)
+    local pX, pY, pZ = table.unpack(GetGameplayCamCoords())
+    SetTextScale(0.35, 0.35)
+    SetTextFont(4)
+    SetTextProportional(1)
+    SetTextColour(255, 255, 255, 215)
+    SetTextEntry("STRING")
+    SetTextCentre(1)
+    AddTextComponentString(text)
+    DrawText(_x, _y)
+    local factor = (string.len(text)) / 370
+    DrawRect(_x, _y + 0.0125, 0.015 + factor, 0.03, 41, 11, 41, 68)
 end

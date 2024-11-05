@@ -106,18 +106,29 @@ h1, h2 {
   align-items: center;
 }
 
-
-
-
 input[type="color"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
   margin-left: 10px;
-  border-radius: 10px; 
-  background-color: #444;
-  border: none; 
-  width: 40px;
-  height: 30px;
+  border-radius: 10px;
+  background-color: transparent;
+  border: none;
+  width: 45px;
+  height: 42px;
+  top: 11px;
+  position: relative;
 }
 
+input[type="color"]::-webkit-color-swatch {
+  border-radius: 10px;
+  border: none;
+}
+
+input[type="color"]::-moz-color-swatch {
+  border-radius: 10px;
+  border: none;
+}
 
 .control input[type="checkbox"] {
   margin-left: 5px;
@@ -136,6 +147,7 @@ input[type="color"] {
   cursor: pointer;
   margin: 5 5px;
   border-radius: 10px;
+  box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.123);
 }
 
 .tab-btn.active {
@@ -158,6 +170,7 @@ input[type="color"] {
   cursor: pointer;
   margin: 20 5px;
   border-radius: 10px;
+  box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.123);
 }
 
 .preset-btn:disabled {

@@ -1,111 +1,33 @@
 installedNeons = json.decode(LoadResourceFile(GetCurrentResourceName(), "./installedNeons.json")) or {}
 savedConfigs = json.decode(LoadResourceFile(GetCurrentResourceName(), "./savedConfigs.json"))
-framework, core = nil, nil
-
 
 Citizen.CreateThread(function()
-    if GetResourceState('es_extended') == 'started' then
-        core = exports['es_extended']:getSharedObject()
-        framework = "ESX"
-    elseif GetResourceState('qb-core') == 'started' then
-        core = exports['qb-core']:GetCoreObject() 
-        framework = "QB"
-    end
     Wait(500)
     if Config.neons.command then
         RegisterCommand(Config.neons.commandName, function(source)
-            local src = source
-            local ped = GetPlayerPed(src)
-            local vehicle = GetVehiclePedIsIn(ped, false)
-            if vehicle ~= 0 then
-                if Config.mechanicOnly.neonMenu then 
-                    if not isMechanic(src) then return end
-                end
-                if Config.needInstall then
-                    local plate = GetVehicleNumberPlateText(vehicle)
-                    if installedNeons[plate]?.neonInstalled then
-                        TriggerClientEvent("nass_neons:openMenu", src)
-                    end
-                else
-                    TriggerClientEvent("nass_neons:openMenu", src)
-                end
-            end
+            openNeonsMenu(source)
         end)
     end
 
     if Config.neons.item then
         registerUsableItem(Config.neons.itemName, function(source)
-            local src = source
-            local ped = GetPlayerPed(src)
-            local vehicle = GetVehiclePedIsIn(ped, false)
-            if vehicle ~= 0 then
-                if Config.mechanicOnly.neonMenu then 
-                    if not isMechanic(src) then return end
-                end
-                if Config.needInstall then
-                    local plate = GetVehicleNumberPlateText(vehicle)
-                    if installedNeons[plate]?.neonInstalled then
-                        TriggerClientEvent("nass_neons:openMenu", src)
-                    end
-                else
-                    TriggerClientEvent("nass_neons:openMenu", src)
-                end
-            end
+            openNeonsMenu(source)
         end)
     end
 
     if Config.needInstall then
         if Config.installNeon.command then
             RegisterCommand(Config.installNeon.commandName, function(source)
-                local src = source
-                local ped = GetPlayerPed(src)
-                local vehicle = GetVehiclePedIsIn(ped, false)
-                if vehicle ~= 0 then
-                    local plate = GetVehicleNumberPlateText(vehicle)
-            
-                    if plate and plate ~= "" then
-                        installNeons(src, plate)
-                    end
-                end
+                installNeons(source, false)
             end)
         end
         if Config.installNeon.item then
             registerUsableItem(Config.installNeon.itemName, function(source)
-                local src = source
-                local ped = GetPlayerPed(src)
-                local vehicle = GetVehiclePedIsIn(ped, false)
-                if vehicle ~= 0 then
-                    local plate = GetVehicleNumberPlateText(vehicle)
-            
-                    if plate and plate ~= "" then
-                        installNeons(src, plate)
-                        removeItem(source, Config.installNeon.itemName, 1)
-                    end
-                end
+                installNeons(source, true)
             end)
         end
     end
 end)
-
-function getIdentifier(source)
-    if framework == 'ESX' then
-        local xPlayer = core.GetPlayerFromId(source)
-        if xPlayer then
-            return xPlayer.identifier
-        end
-    elseif framework == 'QB' then
-        local xPlayer = core.Functions.GetPlayer(source)
-        if xPlayer then
-            return xPlayer.PlayerData.license
-        end
-    else
-        for _, id in ipairs(GetPlayerIdentifiers(source)) do
-            if string.find(id, "license:") then
-                return id
-            end
-        end
-    end
-end
 
 RegisterNetEvent("nass_neons:getSavedConfigs")
 AddEventHandler("nass_neons:getSavedConfigs", function()
@@ -134,10 +56,9 @@ AddEventHandler("nass_neons:deleteSavedConfig", function(index)
     TriggerClientEvent("nass_neons:populateSavedConfigs", src, savedConfigs[ident])
 end)
 
-function installNeons(src, plate)
-    if Config.mechanicOnly.installNeons then
-        if not isMechanic(src) then return end
-    end
+RegisterNetEvent("nass_neons:installNeons")
+AddEventHandler("nass_neons:installNeons", function(plate, item)
+    local src = source
 
     if plate == nil or plate == "" then return end
 
@@ -146,32 +67,60 @@ function installNeons(src, plate)
     end
 
     installedNeons[plate] = {neonInstalled = true}
+    TriggerClientEvent("nass_neons:notify", src, Config.locale["neons_succ_installed"])
+    if item then
+        removeItem(source, Config.installNeon.itemName, 1)
+    end
+end)
+
+RegisterNetEvent("nass_neons:callback")
+AddEventHandler("nass_neons:callback", function(data)
+    local src = source
+    TriggerClientEvent("nass_neons:serverCallback", -1, data)
+end)
+
+function installNeons(src, item)
+    if Config.mechanicOnly.installNeons then
+        if not isMechanic(src) then 
+            TriggerClientEvent("nass_neons:notify", src, Config.locale["isnt_mech"])
+            return 
+        end
+    end
+
+    local ped = GetPlayerPed(src)
+    local vehicle = GetVehiclePedIsIn(ped, false)
+
+    if vehicle ~= 0 then
+        local plate = GetVehicleNumberPlateText(vehicle)
+        if installedNeons[plate]?.neonInstalled then
+            TriggerClientEvent("nass_neons:notify", src, Config.locale["neons_succ_installed"])
+        else
+            TriggerClientEvent("nass_neons:installNeons", src, item)
+        end
+    end
 end
 
-function isMechanic(src)
-    if framework == 'ESX' then
-        local xPlayer = core.GetPlayerFromId(src)
 
-        if xPlayer and xPlayer.job and xPlayer.job.name then
-            for _, job in ipairs(Config.mechanicOnly.jobs) do
-                if xPlayer.job.name == job then
-                    return true
-                end
+function openNeonsMenu(src)
+    local ped = GetPlayerPed(src)
+    local vehicle = GetVehiclePedIsIn(ped, false)
+    if vehicle ~= 0 then
+        if Config.mechanicOnly.neonMenu then 
+            if not isMechanic(src) then
+                TriggerClientEvent("nass_neons:notify", src, Config.locale["isnt_mech"])
+                return 
             end
         end
-    elseif framework == 'QB' then
-        local xPlayer = core.Functions.GetPlayer(src)
-
-        if xPlayer and xPlayer.PlayerData and xPlayer.PlayerData.job and xPlayer.PlayerData.job.name then
-            for _, job in ipairs(Config.mechanicOnly.jobs) do
-                if xPlayer.PlayerData.job.name == job then
-                    return true
-                end
+        if Config.needInstall then
+            local plate = GetVehicleNumberPlateText(vehicle)
+            if installedNeons[plate]?.neonInstalled then
+                TriggerClientEvent("nass_neons:openMenu", src)
+            else
+                TriggerClientEvent("nass_neons:notify", src, Config.locale["neons_not_installed"])
             end
+        else
+            TriggerClientEvent("nass_neons:openMenu", src)
         end
-    else
-        --Add Mechanic Check
-        return true
     end
 end
 
@@ -180,25 +129,3 @@ AddEventHandler('onResourceStop', function(resourceName)
     SaveResourceFile(GetCurrentResourceName(), "installedNeons.json", json.encode(installedNeons), -1)
     SaveResourceFile(GetCurrentResourceName(), "savedConfigs.json", json.encode(savedConfigs), -1)
 end)
-
-function removeItem(source, item, amount)
-    if framework == 'ESX' then
-        local xPlayer = core.GetPlayerFromId(source)
-        if xPlayer then
-            xPlayer.removeInventoryItem(item, amount)
-        end
-    elseif framework == 'QB' then
-        local xPlayer = core.Functions.GetPlayer(source)
-        if xPlayer then
-            xPlayer.Functions.RemoveItem(item, amount)
-        end
-    end
-end
-
-function registerUsableItem(item, cb)
-    if framework == 'ESX' then
-        core.RegisterUsableItem(item, cb)
-    elseif framework == 'QB' then
-        core.Functions.CreateUseableItem(item, cb)
-    end
-end

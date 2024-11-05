@@ -8,9 +8,9 @@ author 'Nass#1411'
 version '1.0.0'
 
 
-shared_scripts { 'config.lua'}
-server_scripts { '@oxmysql/lib/MySQL.lua', 'server/server.lua' }
-client_scripts { 'client/client.lua' }
+shared_scripts { 'locale.lua', 'config.lua'}
+server_scripts { '@oxmysql/lib/MySQL.lua', 'server/*.lua' }
+client_scripts { 'client/*.lua' }
 
 ui_page 'html/index.html'
 files { 

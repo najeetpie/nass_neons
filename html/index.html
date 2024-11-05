@@ -9,32 +9,31 @@
 </head>
 <body>
     <div class="container">
-        <h1>Vehicle Neon Control</h1>
+        <h1 id="cont-h1" data-locale="neon_controller">Vehicle Neon Control</h1>
 
         <div class="tabs">
-            <button class="tab-btn active" data-target="page1">Underglow</button>
-            <button class="tab-btn" data-target="page2">Headlights</button>
-            <button class="tab-btn" data-target="page3">Saved</button>
+            <button class="tab-btn active" data-target="page1" data-locale="tab_underglow">Underglow</button>
+            <button class="tab-btn" data-target="page2" data-locale="tab_headlights">Headlights</button>
+            <button class="tab-btn" data-target="page3" data-locale="tab_saved">Saved</button>
         </div>
-
 
         <div id="page1" class="tab-content active">
             <div class="overall-controls">
                 <div class="section">
-                    <h2>Overall Neon Color</h2>
+                    <h2 data-locale="overall_neon_color">Overall Neon Color</h2>
                     <input type="color" id="overall-color" value="#ffffff">
-                    <button class="preset-btn" data-animation="toggleLight">Toggle</button>
-                    <button class="preset-btn" data-animation="rainbow">Rainbow</button>
+                    <button class="preset-btn" data-animation="toggleLight" data-locale="btn_toggle">Toggle</button>
+                    <button class="preset-btn" data-animation="rainbow" data-locale="btn_rainbow">Rainbow</button>
                 </div>
 
                 <div class="section">
-                    <h2>Animations</h2>
-                    <button class="preset-btn" data-animation="flashNeon">Flash</button>
-                    <button class="preset-btn" data-animation="breathingNeon">Breathing</button>
-                    <button class="preset-btn" data-animation="raveNeon">Rave</button>
-                    <button class="preset-btn" data-animation="aroundNeon">Around</button>
-                    <button class="preset-btn" data-animation="ftbNeon">Front To Back</button>
-                    <button class="preset-btn" data-animation="reactiveNeon">Reactive</button>
+                    <h2 data-locale="animations">Animations</h2>
+                    <button class="preset-btn" data-animation="flashNeon" data-locale="btn_flash">Flash</button>
+                    <button class="preset-btn" data-animation="breathingNeon" data-locale="btn_breathing">Breathing</button>
+                    <button class="preset-btn" data-animation="raveNeon" data-locale="btn_rave">Rave</button>
+                    <button class="preset-btn" data-animation="aroundNeon" data-locale="btn_around">Around</button>
+                    <button class="preset-btn" data-animation="ftbNeon" data-locale="btn_ftb">Front To Back</button>
+                    <button class="preset-btn" data-animation="reactiveNeon" data-locale="btn_reactive">Reactive</button>
                 </div>
             </div>
 
@@ -48,40 +47,39 @@
 
             <div class="controls">
                 <div class="control">
-                    <label for="front-color">Front</label>
+                    <label for="front-enable" data-locale="label_front">Front</label>
                     <input type="checkbox" id="front-enable" checked>
                 </div>
                 <div class="control">
-                    <label for="back-color">Back</label>
+                    <label for="back-enable" data-locale="label_back">Back</label>
                     <input type="checkbox" id="back-enable" checked>
                 </div>
             </div>
 
             <div class="controls">
                 <div class="control">
-                    <label for="left-color">Left</label>
+                    <label for="left-enable" data-locale="label_left">Left</label>
                     <input type="checkbox" id="left-enable" checked>
                 </div>
                 <div class="control">
-                    <label for="right-color">Right</label>
+                    <label for="right-enable" data-locale="label_right">Right</label>
                     <input type="checkbox" id="right-enable" checked>
                 </div>
             </div>
         </div>
 
-
         <div id="page2" class="tab-content">
             <div class="overall-controls">
                 <div class="section">
-                    <h2>Overall Headlight Color</h2>
+                    <h2 data-locale="overall_headlight_color">Overall Headlight Color</h2>
                     <input type="color" id="overall-headlight-color" value="#000000">
-                    <button class="preset-btn" data-animation="clearHeadlights">Clear</button>
-                    <button class="preset-btn" data-animation="rainbowHeadlights">Rainbow</button>
+                    <button class="preset-btn" data-animation="clearHeadlights" data-locale="btn_clear">Clear</button>
+                    <button class="preset-btn" data-animation="rainbowHeadlights" data-locale="btn_rainbow_headlights">Rainbow</button>
                 </div>
 
                 <div class="section">
-                    <h2>Animations</h2>
-                    <button class="preset-btn" data-animation="flashHeadlights">Flash</button>
+                    <h2 data-locale="headlight_animations">Animations</h2>
+                    <button class="preset-btn" data-animation="flashHeadlights" data-locale="btn_flash_headlights">Flash</button>
                 </div>
             </div>
 
@@ -92,17 +90,15 @@
             </div>
         </div>
 
-
         <div id="page3" class="tab-content">
             <div class="input-container">
-                <input type="text" id="presetInput" placeholder="Enter configuration name" />
-                <button id="savePresetButton">Save Configuration</button>
+                <input type="text" id="presetInput" placeholder="Enter configuration name" data-locale="input_placeholder"/>
+                <button id="savePresetButton" data-locale="btn_save">Save Configuration</button>
             </div>
-        
 
-            <div id="savedPresets" class="savedPresets"></div>
+            <div id="savedPresets" class="savedPresets" data-locale="saved_presets_label"></div>
         </div>
-        
+
     </div>
 
     <script src="script.js"></script>

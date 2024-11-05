@@ -1,4 +1,5 @@
 var Config
+
 window.addEventListener('message', function(event) {
     var data = event.data;
     if(data.event=="openMenu"){
@@ -30,7 +31,7 @@ function addSavedPresets(presets){
         presetName.classList.add('preset-name');
     
         const applyButton = document.createElement('button');
-        applyButton.textContent = 'Apply';
+        applyButton.textContent = Config.locale["apply"];
         applyButton.classList.add('apply-btn');
 
         applyButton.addEventListener('click', () => {
@@ -41,7 +42,7 @@ function addSavedPresets(presets){
         });
     
         const deleteButton = document.createElement('button');
-        deleteButton.textContent = 'Delete';
+        deleteButton.textContent = Config.locale["delete"];
         deleteButton.classList.add('delete-btn');
         deleteButton.addEventListener('click', () => {
             listItem.remove();
@@ -190,10 +191,25 @@ function closeMenu(){
     document.body.style.display = "none";
 }
 
+function setLocales() {
+    document.querySelectorAll('[data-locale]').forEach(element => {
+        const localeKey = element.getAttribute('data-locale');
+        if (Config.locale[localeKey]) {
+            if (element.tagName === 'INPUT' && element.type === 'text') {
+                element.placeholder = Config.locale[localeKey];
+            } else {
+                element.textContent = Config.locale[localeKey];
+            }
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     $.post(`https://${GetParentResourceName()}/getConfig`, JSON.stringify({}), function(data) {
         Config = data
+        setLocales()
     });
+    
 
     const neons = {
         front: document.getElementById('front-neon'),
@@ -299,7 +315,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }));
     });
 
-    overallHeadlightColor.addEventListener('input', function () {
+    overallHeadlightColor.addEventListener('change', function () {
         Object.keys(headlights).forEach(side => {
             const headlight = headlights[side];
             headlight.style.backgroundColor = overallHeadlightColor.value;
