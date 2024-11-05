@@ -381,6 +381,7 @@ function getNeonData(veh)
     }
     return neonData
 end
+exports('getNeonData', getNeonData)
 
 function setNeonData(veh, data)
     vehicle = veh
@@ -406,7 +407,7 @@ function setNeonData(veh, data)
         end
     end)
 end
-
+exports('setNeonData', setNeonData)
 
 local vehicleBones = {
     { label = "Front", bone = "bonnet" },
