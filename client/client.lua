@@ -439,6 +439,16 @@ function installNeon(vehicle, item)
         end
     end
 
+    while cornersCompleted[vehicleBones[currentCornerIndex]?.label]?.completed do
+        currentCornerIndex = currentCornerIndex + 1
+        if currentCornerIndex > #vehicleBones then
+            isInstalling = false
+            notify(Config.locale["neons_succ_installed"])
+            TriggerServerEvent("nass_neons:installNeons", GetVehicleNumberPlateText(vehicle), item)
+            vehicle = 0
+        end
+    end
+
     Citizen.CreateThread(function()
         while isInstalling do
             Wait(0)
