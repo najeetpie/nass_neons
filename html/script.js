@@ -69,6 +69,20 @@ function syncVehicleDataDelayed(){
     }, 60);
 }
 
+const neonAnimationElements = [
+    "flashNeon",
+    "breathingNeon",
+    "raveNeon",
+    "aroundNeon",
+    "ftbNeon",
+    "reactiveNeon",
+    "flashHeadlights",
+];
+
+const headlightAnimationElements = [
+    "flashHeadlights",
+];
+
 function syncVehicleData() {
     $.post(`https://${GetParentResourceName()}/getVehicleData`, JSON.stringify({}), function(data) {
         const neonsElements = {
@@ -83,18 +97,6 @@ function syncVehicleData() {
             left: document.getElementById('left-enable'),
             right: document.getElementById('right-enable'),
         };
-        const neonAnimationElements = [
-            "flashNeon",
-            "breathingNeon",
-            "raveNeon",
-            "aroundNeon",
-            "ftbNeon",
-            "reactiveNeon",
-        ];
-
-        const headlightAnimationElements = [
-            "flashHeadlights",
-        ];
 
         
         var neonColorHex = rgbToHex(data.neonColor[0], data.neonColor[1], data.neonColor[2])
@@ -270,6 +272,9 @@ document.addEventListener('DOMContentLoaded', function () {
             if (data) {
                 $.post(`https://${GetParentResourceName()}/callback`, JSON.stringify(data));
                 syncVehicleDataDelayed();
+                neonAnimationElements.forEach(  animationElement => {
+                    document.querySelector(`[data-animation="${animationElement}"]`).style.backgroundColor = '#444'
+                })
                 button.style.backgroundColor = '#048aff'
             }
         });
